@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="src/css/main.css">
+  <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+  <!-- FONT -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- END OF FONT -->
+  <script src="https://kit.fontawesome.com/9b0286b6f2.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+  <div class="drag">
+  </div>
+
+  <header>
+    <div class="logo">
+      <img src="src/images/logo.png" alt="AvdanOS Logo" width="48px">
+    </div>
+    <div class="buttons">
+      <button id="minBtn" href="" class="btn"><img src="src/images/minimize.svg" height="15px"></button>
+      <button id="closeBtn" href="" class="btn"><img src="src/images/close.svg" height="16px"></button>
+    </div>
+  </header>
+  <main>
+    <div class="avdanosflashlogo">
+        <h1>AvdanOS Imager</h1>
+    </div>
+    <div class="drive">
+        <i class="fa-regular fa-hard-drive" style="font-size: 48px;"></i>
+    </div>
+    <div class="iso">
+        <i class="fa-solid fa-compact-disc" style="font-size: 48px;"></i>
+    </div>
+    <div class="drivedropdown">
+        <select name="drive-select" id="drive-select" class="drive-select" style="width: 125px;">
+            <option value="0" selected>Select a drive</option>
+            <option value="Drive1">Drive 1</option>
+            <option value="Drive2">Drive 2</option>
+        </select>
+    </div>
+    <div class="isodropdown">
+        <select name="iso-select" id="iso-select" class="iso-select" style="width: 125px;">
+            <option value="0" selected>Select an option</option>
+            <option value="Drive1">Download</option>
+            <option value="Drive2">Select custom ISO file</option>
+        </select>
+    </div>
+
+  </main>
+  <footer>
+    <div class="right">
+      <button class="nextBtn" id="flashbtn" onclick="window.location.replace('downloading.html')">Flash!&nbsp;&nbsp;<i class="fa-solid fa-bolt-lightning"></i></i></i></button>
+    </div>
+  </footer>
+  <script src="renderer.js"></script>
+  <script src="listdrives.js"></script>
+</body>
+
+</html>

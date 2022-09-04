@@ -1,0 +1,26 @@
+{
+  "name": "avdanosimager",
+  "productName": "avdanosimager",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "0.0.1",
+  "author": "Team AvdanOS",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "discord-rpc": "^4.0.1",
+    "download": "^8.0.0",
+    "etcher-cli": "^0.0.2",
+    "express": "^4.18.1",
+    "path": "^0.12.7",
+    "popups": "^1.1.3",
+    "progress": "^2.0.3",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "electron": "^19.0.14"
+  }
+}
