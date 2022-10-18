@@ -1,7 +1,9 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
+const { app, ipcMain, BrowserWindow, globalShortcut } = require("electron");
 const path = require("path");
-const DiscordRPC = require("discord-rpc");
+const { setVibrancy } = require('electron-acrylic-window')
+
+
 
 function createWindow() {
   // Create the browser window.
@@ -11,6 +13,7 @@ function createWindow() {
     titleBarStyle: "hidden",
     maximizable: false,
     resizable: false,
+    frame: false,
     fullscreenable: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -18,15 +21,17 @@ function createWindow() {
       contextIsolation: false,
       enableRemoteModule: true,
     },
-    icon: "src/images/icon.png",
+    icon: "./src/components/images/icon.png",
   });
-
+  mainWindow.setVibrancy("dark");
   // and load the index.html of the app.
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile("./src/index.html");
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
   return mainWindow;
 }
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -40,29 +45,6 @@ app.whenReady().then(() => {
     bigasswindow.minimize();
   });
 
-  const clientId = "1012098922652631062";
-  const rpc = new DiscordRPC.Client({ transport: "ipc" });
-  const startTimestamp = new Date();
-
-  async function setActivity() {
-    rpc.setActivity({
-      details: "Installing AvdanOS....",
-      state: "Formatting HDD.......",
-      startTimestamp,
-      largeImageKey: "defaultpfp",
-      largeImageText: "Installing AvdanOS",
-      instance: false,
-    });
-  }
-
-  rpc.on("ready", () => {
-    setActivity();
-    setInterval(() => {
-      setActivity();
-    }, 15000);
-  });
-
-  rpc.login({ clientId }).catch(console.error);
 
   app.on("browser-window-focus", function () {
     /*globalShortcut.register("CommandOrControl+R", () => {
