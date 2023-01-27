@@ -3,3 +3,4 @@ out
 package-lock.json
 .gitignore
 .vscode
+azure-pipelines.yml
