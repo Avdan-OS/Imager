@@ -3,9 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="src/css/main.css" />
-    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <link rel="stylesheet" href="./components/css/main.css" />
 
     <!-- FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,15 +19,17 @@
     <div class="drag"></div>
 
     <header>
-      <div class="logo">
-        <img src="src/images/logo.png" alt="AvdanOS Logo" width="48px" />
+      <div class="title">
+        <img src="./components/images/titlelogo.png" height="20px" class="titlelogo" />
+        &nbsp; &nbsp;
+        <p>AvdanOS Imager</p>
       </div>
       <div class="buttons">
         <button id="minBtn" href="" class="btn">
-          <img src="src/images/minimize.svg" height="15px" />
+          <img src="./components/images/minimize.svg" height="15px" />
         </button>
         <button id="closeBtn" href="" class="btn">
-          <img src="src/images/close.svg" height="16px" />
+          <img src="./components/images/close.svg" height="16px" />
         </button>
       </div>
     </header>
@@ -45,9 +45,9 @@
       </div>
     </main>
     <footer></footer>
-    <script src="renderer.js"></script>
-    <script src="listdrives.js"></script>
-    <script src="progress-bar.js"></script>
-    <script src="downloader.js"></script>
+    <script src="./components/js/renderer.js"></script>
+    <script src="./components/js/progress-bar.js"></script>
+    <script src="./components/js/downloadrpc.js"></script>
+    <script src="./components/js/downloader.js"></script>
   </body>
 </html>

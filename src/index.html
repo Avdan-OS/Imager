@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="src/css/main.css" />
-    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+    <link rel="stylesheet" href="./components/css/main.css" />
     <!-- FONT -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,22 +14,26 @@
     ></script>
   </head>
 
-  <body data-barba="wrapper">
+  <body>
     <div class="drag"></div>
-
     <header>
       <div class="buttons">
         <button id="minBtn" href="" class="btn">
-          <img src="src/images/minimize.svg" height="15px" />
+          <img src="./components/images/minimize.svg" height="15px" />
         </button>
         <button id="closeBtn" href="" class="btn">
-          <img src="src/images/close.svg" height="16px" />
+          <img src="./components/images/close.svg" height="16px" />
         </button>
       </div>
+      <div class="title">
+        <img src="./components/images/titlelogo.png" height="20px" class="titlelogo" />
+        &nbsp; &nbsp;
+        <p>AvdanOS Imager</p>
+      </div>
     </header>
-    <main data-barba="container" data-barba-namespace="step-0">
+    <main>
       <div class="avdanostxtlogo">
-        <img src="src/images/logofullwhite.png" class="logomaintxt" width="354" alt="AvdanOS">
+        <img src="./components/images/logofullwhite.png" class="logomaintxt" width="354" alt="AvdanOS">
       </div>
       <div class="avdanostxtlogodescription">
         <p>Your PC but Even Better!</p>
@@ -44,10 +47,11 @@
           id="nextBtn"
           onclick="window.location.replace('page2.html')"
         >
-          Next&nbsp;&nbsp;<i class="fa-solid fa-arrow-right"></i>
+          &nbsp;&nbsp;Next&nbsp;&nbsp;<i class="fa-solid fa-arrow-right"></i>&nbsp;&nbsp;
         </button>
       </div>
     </footer>
-    <script src="renderer.js"></script>
+    <script src="./components/js/renderer.js"></script>
+    <script src="./components/js/indexrpc.js"></script>
   </body>
 </html>

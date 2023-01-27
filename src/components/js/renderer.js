@@ -16,11 +16,4 @@ function minimizeApp(e) {
 
 document.getElementById("minBtn").addEventListener("click", minimizeApp);
 
-const PAGES = ["./step-0.html", "./step-1.html"];
-
-function nextPage1(e) {
-  e.preventDefault();
-  ipc.send("nextPage1");
-}
-
-document.getElementById("nextBtn").addEventListener("click", nextPage1);
+document.getElementById("main").classList.add("is-loaded");
