@@ -20,6 +20,21 @@ Legend:
 
 `❔` Porting to Tauri
 
+## Getting Started
+
+Make sure you have NodeJS 14 or later installed.
+
+```
+npm install
+npm run start
+```
+
+You should see the Imager appear after.
+
+Hit CTRL+R after any changes made to the source code.
+
 ## Contributing
 
 Please see the [contributing guidelines](https://github.com/Avdan-OS/Imager/blob/main/CONTRIBUTING.md) for more info.
+
+
