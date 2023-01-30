@@ -1,5 +1,5 @@
-const progressBar = document.getElementById("bar");
+const progressBar = document.getElementById('bar');
 
 function setBar(percentage) {
-  progressBar.style.width = percentage + "%";
+  progressBar.style.width = percentage + '%';
 }
