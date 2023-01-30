@@ -7,9 +7,7 @@
   "version": "0.0.1",
   "author": "AvdanOS",
   "scripts": {
-    "start": "electron .",
-    "lint:fix": "eslint --fix --ext .js,.jsx .",
-    "lint": "eslint ."
+    "start": "electron ."
   },
   "dependencies": {
     "discord-rpc": "^4.0.1",
@@ -18,8 +16,6 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
-    "electron": "^19.0.14",
-    "eslint": "^8.33.0",
-    "eslint-config-google": "^0.14.0"
+    "electron": "^19.0.14"
   }
 }
