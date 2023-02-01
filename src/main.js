@@ -40,11 +40,11 @@ function createWindow() {
   splash.center();
 
 
-  setTimeout(function() {
-    splash.close();
-    mainWindow.center();
-    mainWindow.show();
-  }, 5000);
+ setTimeout(function() {
+   splash.close();
+   mainWindow.center();
+   mainWindow.show();
+ }, 5000);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
   return mainWindow;
