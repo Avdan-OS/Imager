@@ -18,7 +18,7 @@ Legend:
 
 `❌` App Installer
 
-`❔` Porting to Tauri
+`❔` Tauri Port
 
 ## Getting Started
 
