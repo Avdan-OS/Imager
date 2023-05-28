@@ -7,7 +7,6 @@ function closeApp(e) {
 }
 
 document.getElementById("closeBtn").addEventListener("click", closeApp);
-document.getElementById("disagreeBtn").addEventListener("click", closeApp);
 
 function minimizeApp(e) {
   e.preventDefault();
