@@ -181,7 +181,7 @@ footer button:hover {
   width: 400px;
   height: 25px;
   background-color: hsla(0, 0%, 12%, 1);
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 #bar {
@@ -189,7 +189,7 @@ footer button:hover {
   height: 100%;
   background-color: hsla(334, 100%, 59%, 1);
   transition: width 0.2s;
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 body.is-loaded {

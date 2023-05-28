@@ -267,13 +267,14 @@ body.is-loaded {
   position: absolute;
   display: flex;
 }
-.download:active{
+
+.download:focus {
     background-color: rgba(255, 46, 137, 0.5);
 }
-.selectISO:active{
+.selectISO:focus {
     background-color: rgba(255, 46, 137, 0.5);
 }
-.eraseMedium:active{
+.eraseMedium:focus {
     background-color: rgba(255, 46, 137, 0.5);
 }
 
