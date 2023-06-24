@@ -21,6 +21,7 @@ body {
   margin: 0px;
   box-sizing: border-box;
   background: hsla(0, 0%, 6%, 0.7);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("https://i.postimg.cc/13Mhj4qB/bg.png");
   -webkit-backdrop-filter: blur(50px);
   backdrop-filter: blur(50px);
   width: 100vw;
