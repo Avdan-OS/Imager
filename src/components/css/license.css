@@ -1,6 +1,6 @@
 html, body {
     font-family: Inter, sans-serif;
-    background: rgba(29, 29, 29);
+    background: rgb(13, 13, 13);
     color: white;
 }
 
@@ -11,7 +11,7 @@ a:link {
 
 ::-webkit-scrollbar {
     width: 10px;
-    background: rgba(29, 29, 29);
+    background: rgb(13, 13, 13);
 }
 ::-webkit-scrollbar-track {
     background: transparent;

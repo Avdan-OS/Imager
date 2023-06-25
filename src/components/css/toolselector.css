@@ -120,6 +120,8 @@ header {
     border-radius: 6px;
     background-color: rgba(0, 0, 0, 0.4);
     border: 0px;
+
+    transition: background-color 0.15s ease-out;
 }
 .selectISO{
     width: 100%;
@@ -128,6 +130,8 @@ header {
     border-radius: 6px;
     background-color: rgba(0, 0, 0, 0.4);
     border: 0px;
+
+    transition: background-color 0.15s ease-out;
 }
 .eraseMedium{
     width: 100%;
@@ -135,6 +139,8 @@ header {
     border-radius: 6px;
     background-color: rgba(0, 0, 0, 0.4);
     border: 0px;
+
+    transition: background-color 0.15s ease-out;
 }
 
 .avdanostxtlogodescription p {
@@ -268,14 +274,36 @@ body.is-loaded {
   display: flex;
 }
 
+.download:hover {
+    background-color: rgba(255, 46, 137, 0.25);
+
+    transition: background-color 0.15s ease-in;
+}
+.selectISO:hover {
+    background-color: rgba(255, 46, 137, 0.25);
+
+    transition: background-color 0.15s ease-in;
+}
+.eraseMedium:hover {
+    background-color: rgba(255, 46, 137, 0.25);
+
+    transition: background-color 0.15s ease-in;
+}
+
 .download:focus {
     background-color: rgba(255, 46, 137, 0.5);
+
+    transition: background-color 0.15s ease-in;
 }
 .selectISO:focus {
     background-color: rgba(255, 46, 137, 0.5);
+
+    transition: background-color 0.15s ease-in;
 }
 .eraseMedium:focus {
     background-color: rgba(255, 46, 137, 0.5);
+
+    transition: background-color 0.15s ease-in;
 }
 
 .pg3btn {
