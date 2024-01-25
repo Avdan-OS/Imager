@@ -3,4 +3,4 @@ cd Imager
 sudo apt update
 sudo apt install npm
 npm install
-npm run
+npm run start
