@@ -14,11 +14,9 @@ Legend:
 
 `🚧` Main UI
 
+`🚧` Native C++ Desktop Port
+
 `❌` Flashing Back-End
-
-`❌` App Installer
-
-`❔` Porting to Tauri
 
 ## Getting Started
 
