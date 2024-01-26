@@ -12,8 +12,8 @@ function createWindow() {
     titleBarStyle: "hidden",
     maximizable: false,
     resizable: false,
+    transparent: true,
     frame: false,
-    show: false,
     fullscreenable: false,
     webPreferences: {
       preload: path.join(__dirname, "./components/js/preload.js"),
@@ -25,26 +25,6 @@ function createWindow() {
   });
 
   mainWindow.loadFile("./src/index.html");
-  
-  var splash = new BrowserWindow({
-    width: 500,
-    height: 300,
-    transparent: true,
-    frame: false,
-    show: true,
-    fullscreen: true,
-    alwaysOnTop: true,
-  });
-
-  splash.loadFile("./src/splash.html");
-  splash.center();
-
-
- setTimeout(function() {
-   splash.close();
-   mainWindow.center();
-   mainWindow.show();
- }, 5000);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
   return mainWindow;

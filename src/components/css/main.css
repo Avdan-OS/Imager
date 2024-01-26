@@ -11,6 +11,8 @@
   -webkit-app-region: drag;
 }
 
+
+
 body {
   font-family: Inter, sans-serif;
 
@@ -18,11 +20,10 @@ body {
   padding: 0px;
   margin: 0px;
   box-sizing: border-box;
-  background: hsla(0, 0%, 6%, 0.64);
+  background: hsla(0, 0%, 6%, 0.7);
   background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("https://i.postimg.cc/13Mhj4qB/bg.png");
-  background-repeat: no-repeat;
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -31,7 +32,6 @@ body {
   justify-items: center;
   justify-content: center;
   user-select: none;
-  -webkit-user-select: none;
 }
 
 main {
@@ -182,7 +182,7 @@ footer button:hover {
   width: 400px;
   height: 25px;
   background-color: hsla(0, 0%, 12%, 1);
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 #bar {
@@ -190,7 +190,7 @@ footer button:hover {
   height: 100%;
   background-color: hsla(334, 100%, 59%, 1);
   transition: width 0.2s;
-  border-radius: 5px;
+  border-radius: 12px;
 }
 
 body.is-loaded {

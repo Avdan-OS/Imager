@@ -27,7 +27,7 @@ npm install
 npm run start
 ```
 
-You should see the Imager appear after.
+You should see the Imager window appear after.
 
 Hit CTRL+R after any changes made to the source code.
 
