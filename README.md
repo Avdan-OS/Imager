@@ -14,11 +14,9 @@ Legend:
 
 `🚧` Main UI
 
+`🚧` Native C++ Rewrite
+
 `❌` Flashing Back-End
-
-`❌` App Installer
-
-`❔` Tauri Port
 
 ## Getting Started
 
