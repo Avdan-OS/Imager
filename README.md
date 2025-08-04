@@ -1,6 +1,6 @@
 # AvdanOS Imager
 
-This is a Balena Etcher alternative written in [Electron](https://www.electronjs.org/) (may be ported to [Tauri](https://tauri.app/) in the future).
+This is a Balena Etcher alternative written in C.
 
 ## To-Do List:
 
@@ -12,27 +12,98 @@ Legend:
 ❔ = May be implemented in the future.
 ```
 
-`🚧` Main UI
+`✔️` Core ISO Imaging Engine (CLI)
 
-`🚧` Native C++ Desktop Port
+`❌` GUI Interface
 
-`❌` Flashing Back-End
+`❌` Cross-Platform GUI Framework
+
+## Current Status
+
+The project currently has a **working CLI implementation** with:
+- ✅ ISO to USB writing
+- ✅ Progress tracking
+- ✅ Write verification
+- ✅ Cross-platform support (Linux/macOS, no Windows yet)
+
+The **GUI is planned** but not yet implemented.
+
+## Project Structure
+
+```
+├── include/imager/
+│   ├── progress.h
+│   ├── utils.h
+│   ├── iso_operations.h
+│   └── imager.h
+├── src/
+│   ├── core/
+│   │   ├── progress.c
+│   │   └── iso_operations.c
+│   ├── utils/
+│   │   └── utils.c
+│   └── main.c
+├── docs/
+│   ├── BUILD.md
+│   └── USAGE.md
+├── Makefile
+├── CMakeLists.txt
+└── README.md
+```
 
 ## Getting Started
 
-Make sure you have NodeJS 14 or later installed.
+### Prerequisites
+- GCC compiler (or compatible C compiler)
+- Make (for Makefile builds)
+- CMake 3.10+ (for CMake builds)
 
+### Build
+```bash
+make
 ```
-npm install
-npm run start
+
+### Usage (CLI)
+```bash
+sudo ./imager <iso_file> <usb_device>
 ```
 
-You should see the Imager window appear after.
+Example:
+```bash
+sudo ./imager ubuntu-22.04.iso /dev/sdX
+```
 
-Hit CTRL+R after any changes made to the source code.
+## Documentation
+
+- **[BUILD.md](docs/BUILD.md)** - Detailed build instructions
+- **[USAGE.md](docs/USAGE.md)** - Complete usage guide and troubleshooting
+
+## Safety
+- **You must run as root/admin to access raw devices.**
+- **All data on the target device will be destroyed!**
+- Double-check your device path before proceeding
+- The program will prompt for confirmation before writing
+
+## Build Systems
+
+### Makefile (Recommended)
+```bash
+make
+make clean
+```
+
+### CMake
+```bash
+mkdir build && cd build
+cmake ..
+make
+```
 
 ## Contributing
 
-Please see the [contributing guidelines](https://github.com/Avdan-OS/Imager/blob/main/CONTRIBUTING.md) for more info.
+Please see the [contributing guidelines](CONTRIBUTING.md) for more info.
+
+## License
+GPLv3
 
 
