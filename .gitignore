@@ -1,6 +1,21 @@
-node_modules
-out
-package-lock.json
-.gitignore
-.vscode
-azure-pipelines.yml
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+imager
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log 
