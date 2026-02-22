@@ -2,7 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <io.h>
+#define read _read
+#define write _write
+#define lseek _lseeki64
+#else
 #include <unistd.h>
+#endif
 
 #define BLOCK_SIZE 65536 // 64KB
 
@@ -27,7 +35,7 @@ int copy_with_progress(int in_fd, int out_fd, off_t total_size, const char *labe
         return -1;
     }
     off_t copied = 0;
-    ssize_t r, w;
+    int r, w;
     while ((r = read(in_fd, buffer, BLOCK_SIZE)) > 0) {
         w = write(out_fd, buffer, r);
         if (w != r) {
@@ -57,7 +65,7 @@ int verify_with_progress(int iso_fd, int dev_fd, off_t total_size) {
         return -1;
     }
     off_t compared = 0;
-    ssize_t r1, r2;
+    int r1, r2;
     lseek(iso_fd, 0, SEEK_SET);
     lseek(dev_fd, 0, SEEK_SET);
     while ((r1 = read(iso_fd, buf1, BLOCK_SIZE)) > 0) {
@@ -83,4 +91,5 @@ int verify_with_progress(int iso_fd, int dev_fd, off_t total_size) {
         return -1;
     }
     return 0;
-} 
+}
+ 

@@ -20,7 +20,12 @@ set(SOURCES
 add_executable(imager ${SOURCES})
 
 # Set compiler flags
-target_compile_options(imager PRIVATE -O2 -Wall)
+if(MSVC)
+    target_compile_options(imager PRIVATE /W4 /D_CRT_SECURE_NO_WARNINGS)
+    # /O2 is incompatible with /RTC1 (default in Debug). CMake handles /O2 in Release by default.
+else()
+    target_compile_options(imager PRIVATE -O2 -Wall)
+endif()
 
 # Install target
-install(TARGETS imager DESTINATION bin) 
+install(TARGETS imager DESTINATION bin)

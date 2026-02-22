@@ -24,7 +24,7 @@ The project currently has a **working CLI implementation** with:
 - ✅ ISO to USB writing
 - ✅ Progress tracking
 - ✅ Write verification
-- ✅ Cross-platform support (Linux/macOS, no Windows yet)
+- ✅ Cross-platform support (Linux, macOS, and Windows)
 
 The **GUI is planned** but not yet implemented.
 
@@ -65,12 +65,21 @@ make
 
 ### Usage (CLI)
 ```bash
+# Linux/macOS
 sudo ./imager <iso_file> <usb_device>
+
+# Windows (Run as Administrator)
+.\imager.exe <iso_file> \\.\PhysicalDriveX
 ```
 
-Example:
+Example (Linux):
 ```bash
 sudo ./imager ubuntu-22.04.iso /dev/sdX
+```
+
+Example (Windows):
+```bash
+.\imager.exe ubuntu-22.04.iso \\.\PhysicalDrive1
 ```
 
 ## Documentation
