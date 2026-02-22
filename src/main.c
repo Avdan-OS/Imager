@@ -44,12 +44,12 @@ int main(int argc, char *argv[]) {
     }
     close(temp_fd);
 
-    if (write_iso_to_device(iso_path, dev_path) != 0) {
+    if (write_iso_to_device(iso_path, dev_path, print_progress_cli) != 0) {
         fprintf(stderr, "Error: Failed to write ISO to device '%s'\n", dev_path);
         return 1;
     }
 
-    if (verify_device_against_iso(iso_path, dev_path, iso_size) != 0) {
+    if (verify_device_against_iso(iso_path, dev_path, iso_size, print_progress_cli) != 0) {
         fprintf(stderr, "Error: Verification failed for device '%s'\n", dev_path);
         return 1;
     }

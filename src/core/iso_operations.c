@@ -95,7 +95,7 @@ int open_device_file(const char *dev_path, int write_mode) {
 #endif
 }
 
-int write_iso_to_device(const char *iso_path, const char *dev_path) {
+int write_iso_to_device(const char *iso_path, const char *dev_path, progress_callback_t cb) {
     off_t iso_size;
     int iso_fd = open_iso_file(iso_path, &iso_size);
     if (iso_fd < 0) {
@@ -121,7 +121,7 @@ int write_iso_to_device(const char *iso_path, const char *dev_path) {
     lseek(dev_fd, 0, SEEK_SET);
 #endif
     
-    if (copy_with_progress(iso_fd, dev_fd, iso_size, "Writing ") != 0) {
+    if (copy_with_progress(iso_fd, dev_fd, iso_size, "Writing ", cb) != 0) {
         fprintf(stderr, "\nWrite failed.\n");
 #ifdef _WIN32
         _close(iso_fd);
@@ -150,7 +150,7 @@ int write_iso_to_device(const char *iso_path, const char *dev_path) {
     return 0;
 }
 
-int verify_device_against_iso(const char *iso_path, const char *dev_path, off_t iso_size) {
+int verify_device_against_iso(const char *iso_path, const char *dev_path, off_t iso_size, progress_callback_t cb) {
 #ifdef _WIN32
     int iso_fd = _open(iso_path, _O_RDONLY | _O_BINARY);
 #else
@@ -172,7 +172,7 @@ int verify_device_against_iso(const char *iso_path, const char *dev_path, off_t 
     }
     
     printf("Verifying written data...\n");
-    if (verify_with_progress(iso_fd, dev_fd, iso_size) != 0) {
+    if (verify_with_progress(iso_fd, dev_fd, iso_size, cb) != 0) {
         fprintf(stderr, "\nVerification failed.\n");
 #ifdef _WIN32
         _close(iso_fd);

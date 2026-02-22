@@ -14,7 +14,7 @@
 
 #define BLOCK_SIZE 65536 // 64KB
 
-void print_progress(off_t done, off_t total, const char *label) {
+void print_progress_cli(off_t done, off_t total, const char *label) {
     int width = 50;
     float percent = (float)done / total;
     int pos = (int)(percent * width);
@@ -28,7 +28,7 @@ void print_progress(off_t done, off_t total, const char *label) {
     fflush(stdout);
 }
 
-int copy_with_progress(int in_fd, int out_fd, off_t total_size, const char *label) {
+int copy_with_progress(int in_fd, int out_fd, off_t total_size, const char *label, progress_callback_t cb) {
     char *buffer = malloc(BLOCK_SIZE);
     if (!buffer) {
         perror("malloc");
@@ -44,10 +44,9 @@ int copy_with_progress(int in_fd, int out_fd, off_t total_size, const char *labe
             return -1;
         }
         copied += r;
-        print_progress(copied, total_size, label);
+        if (cb) cb(copied, total_size, label);
     }
-    print_progress(total_size, total_size, label);
-    printf("\n");
+    if (cb) cb(total_size, total_size, label);
     free(buffer);
     if (r < 0) {
         perror("read");
@@ -56,7 +55,7 @@ int copy_with_progress(int in_fd, int out_fd, off_t total_size, const char *labe
     return 0;
 }
 
-int verify_with_progress(int iso_fd, int dev_fd, off_t total_size) {
+int verify_with_progress(int iso_fd, int dev_fd, off_t total_size, progress_callback_t cb) {
     char *buf1 = malloc(BLOCK_SIZE);
     char *buf2 = malloc(BLOCK_SIZE);
     if (!buf1 || !buf2) {
@@ -81,10 +80,9 @@ int verify_with_progress(int iso_fd, int dev_fd, off_t total_size) {
             return -1;
         }
         compared += r1;
-        print_progress(compared, total_size, "Verifying");
+        if (cb) cb(compared, total_size, "Verifying");
     }
-    print_progress(total_size, total_size, "Verifying");
-    printf("\n");
+    if (cb) cb(total_size, total_size, "Verifying");
     free(buf1); free(buf2);
     if (r1 < 0) {
         perror("read");

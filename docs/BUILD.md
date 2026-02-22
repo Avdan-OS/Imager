@@ -2,84 +2,49 @@
 
 ## Overview
 
-This document covers building the AvdanOS Imager project. Currently, only the CLI version is implemented.
+This project supports both a CLI and a GUI version across Linux, macOS, and Windows.
 
 ## Prerequisites
 
-- GCC compiler (or compatible C compiler)
-- Make (for Makefile builds)
-- CMake 3.10+ (for CMake builds)
+- **GCC compiler** (MinGW-w64 for Windows) or **MSVC** (Visual Studio).
+- **CMake 3.10+**.
+- **wxWidgets 3.2+** (automatically downloaded via CMake for the GUI version).
 
 ## Build Methods
 
-### Using Makefile (Recommended)
+### Using CMake (Recommended for All Platforms)
 
-```bash
-make
-```
-
-This will create the `imager` executable in the project root.
-
-### Using CMake
-
-```bash
+```powershell
 mkdir build
 cd build
 cmake ..
+cmake --build .
+```
+
+This will create:
+- `imager`: The command-line version.
+- `imager-gui`: The graphical user interface version.
+
+### Using Makefile (Linux/macOS CLI Only)
+
+```bash
 make
 ```
 
-### Manual Compilation
+## Platform-Specific Notes
 
-```bash
-gcc -O2 -Wall -I./include -o imager \
-    src/main.c \
-    src/core/progress.c \
-    src/utils/utils.c \
-    src/core/iso_operations.c
-```
+### Windows
+If using Visual Studio, you can open the project folder directly or use the CMake GUI to generate a `.sln` file.
 
-## Cleaning
-
-```bash
-make clean
-```
-
-Or for CMake builds:
-
-```bash
-cd build
-make clean
-```
-
-## Installation
-
-After building, you can install the binary:
-
-```bash
-sudo cp imager /usr/local/bin/
-```
-
-## Future GUI Build
-
-When the GUI is implemented, additional dependencies may be required:
-
-- GTK+ (for Linux GUI)
-- Cocoa (for macOS GUI)
-- Windows API (for Windows GUI)
-- Or some cross-platform framework idk yet
+### Linux
+Ensure you have the development headers for your graphics drivers (Mesa) and X11/Wayland if building the GUI.
 
 ## Development
 
-For development, you can use:
-
 ```bash
-# Debug build
-make CFLAGS="-O0 -g -Wall -I./include"
-
-# Or with CMake
+# Debug build (with CMake)
 mkdir build-debug
 cd build-debug
 cmake -DCMAKE_BUILD_TYPE=Debug ..
-make
+cmake --build .
 ```

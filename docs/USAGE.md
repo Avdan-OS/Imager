@@ -2,39 +2,37 @@
 
 ## Overview
 
-AvdanOS Imager is a tool for writing ISO images to USB devices. It features progress tracking and verification to ensure data integrity. This is the CLI version of the planned GUI application.
+AvdanOS Imager writes ISO images to USB devices. It includes:
+- **CLI version (`imager`)**: For fast, command-line usage.
+- **GUI version (`imager-gui`)**: For a user-friendly drag-and-drop experience.
 
-## Current Status
+## Basic Usage (CLI)
 
-This is currently a **command-line only** implementation. The GUI version is planned for future development.
-
-## Basic Usage
-
+### Linux/macOS
 ```bash
 sudo ./imager <iso_file> <usb_device>
 ```
 
-### Example
-
-```bash
-sudo ./imager ubuntu-22.04.iso /dev/sdX
+### Windows (Administrator)
+```powershell
+.\imager.exe <iso_file> \\.\PhysicalDriveX
 ```
 
-## Safety Warnings
+## GUI Usage
 
-⚠️ **IMPORTANT**: This tool will **completely erase** all data on the target device!
-
-- Always double-check the device path
-- Ensure you have backups of important data
-- The program will prompt for confirmation before proceeding
+1. Launch `imager-gui`.
+2. Drag and drop your `.iso` file onto the window.
+3. Enter the target device path.
+4. Click **FLASH!**.
 
 ## Finding Your USB Device
+
+### Windows
+Run `wmic diskdrive list brief` or use **Disk Management** to find the `PhysicalDrive` number.
 
 ### Linux
 ```bash
 lsblk
-# or
-sudo fdisk -l
 ```
 
 ### macOS
@@ -42,39 +40,46 @@ sudo fdisk -l
 diskutil list
 ```
 
-Look for your USB device (usually appears as `/dev/disk2` or similar).
-
 ## Device Paths
 
 | OS | Example Path |
 |----|--------------|
-| Linux | `/dev/sdX` (where X is a letter) |
-| macOS | `/dev/diskN` (where N is a number) |
+| Windows | `\\.\PhysicalDrive1` |
+| Linux | `/dev/sdX` |
+| macOS | `/dev/diskN` |
 
+## Safety Warnings
+
+⚠️ **IMPORTANT**: This tool will **completely erase** all data on the target device!
+
+- Always double-check the device path.
+- Ensure you have backups.
+- Run as Administrator/Root.
 
 ## Troubleshooting
 
 ### Permission Denied
+Ensure you are running the terminal (or the GUI app) as **Administrator** (Windows) or using **sudo** (Linux/macOS).
 ```bash
 sudo ./imager ubuntu.iso /dev/sdX
 ```
 
 ### Device Not Found
-- Ensure the USB device is properly connected
-- Check device path with `lsblk` or `diskutil list`
-- Make sure the device is not mounted
+- Ensure the USB device is properly connected.
+- Check if the device is mounted; some OSs block raw access to mounted drives.
+- On Windows, ensure you used the `\\.\PhysicalDriveX` format or use the dropdown in the GUI.
 
 ### Verification Failed
-- Try writing again
-- Check if the USB device has sufficient space
-- Ensure the device is not defective
+- Try writing again.
+- Check if the USB device has sufficient space.
+- Ensure the device is not defective. Both the CLI and GUI always perform a verification pass after writing.
 
 ## Advanced Usage
 
 ### Building from Source
 See [BUILD.md](BUILD.md) for build instructions.
 
-### Installation
+### Installation (Linux/macOS)
 ```bash
 sudo cp imager /usr/local/bin/
 ```
@@ -86,10 +91,7 @@ sudo imager ubuntu.iso /dev/sdX
 
 ## Future GUI Features
 
-When the GUI is implemented, you can expect:
-
-- Drag-and-drop ISO file selection
-- Visual device selection
-- Progress bars and status updates
-- Cross-platform compatibility
-- User-friendly interface similar to Balena Etcher 
+While the initial GUI is functional, I plan to add:
+- Automated `.iso` downloading.
+- Advanced partitioning options.
+- User-friendly interface similar to Balena Etcher.
