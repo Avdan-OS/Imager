@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <string.h>
+
+#ifdef _WIN32
+#include <io.h>
+#define close _close
+#else
+#include <unistd.h>
+#endif
+
+#include <sys/types.h>
 #include "imager/utils.h"
 #include "imager/iso_operations.h"
 
@@ -13,6 +20,10 @@ int main(int argc, char *argv[]) {
             return 0;
         }
         basic_usage(argv[0]);
+#ifdef _WIN32
+        printf("\nNote for Windows users: Device path should look like \\\\.\\PhysicalDriveX\n");
+        printf("You can find the drive number in Disk Management or using 'wmic diskdrive list brief'\n");
+#endif
         return 1;
     }
     
@@ -33,12 +44,12 @@ int main(int argc, char *argv[]) {
     }
     close(temp_fd);
 
-    if (write_iso_to_device(iso_path, dev_path) != 0) {
+    if (write_iso_to_device(iso_path, dev_path, print_progress_cli) != 0) {
         fprintf(stderr, "Error: Failed to write ISO to device '%s'\n", dev_path);
         return 1;
     }
 
-    if (verify_device_against_iso(iso_path, dev_path, iso_size) != 0) {
+    if (verify_device_against_iso(iso_path, dev_path, iso_size, print_progress_cli) != 0) {
         fprintf(stderr, "Error: Verification failed for device '%s'\n", dev_path);
         return 1;
     }
@@ -48,4 +59,4 @@ int main(int argc, char *argv[]) {
     printf("The device is now ready for use.\n\n");
 
     return 0;
-} 
+}
