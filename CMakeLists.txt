@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(Imager VERSION 1.0.0 LANGUAGES C)
+project(Imager VERSION 1.0.0 LANGUAGES C CXX)
 
 # Set C standard
 set(CMAKE_C_STANDARD 99)
@@ -63,7 +63,7 @@ if(MSVC)
     set_target_properties(imager-gui PROPERTIES WIN32_EXECUTABLE TRUE)
 else()
     target_compile_options(imager-gui PRIVATE -O2 -Wall)
-    target_link_libraries(imager-gui pthread m dl)
+    target_link_libraries(imager-gui PRIVATE pthread m dl)
 endif()
 
 # Install target
