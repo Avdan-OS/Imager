@@ -3,7 +3,7 @@ build/
 *.o
 *.a
 *.so
-imager
+/imager
 
 # IDE files
 .vscode/
