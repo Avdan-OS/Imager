@@ -50,6 +50,7 @@ set(SOURCES
     src/core/image_reader.c
     src/core/image_write.c
     src/core/windows_iso.c
+    src/core/device_lock.c
 )
 
 # Create executable
@@ -93,6 +94,7 @@ set(GUI_SOURCES
     src/core/image_reader.c
     src/core/image_write.c
     src/core/windows_iso.c
+    src/core/device_lock.c
 )
 
 # Create GUI executable

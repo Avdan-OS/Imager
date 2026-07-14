@@ -9,6 +9,7 @@
 #include "imager/image_reader.h"
 #include "imager/image_write.h"
 #include "imager/windows_iso.h"
+#include "imager/device_lock.h"
 
 static void extra_usage(void) {
     printf("\nOptions:\n");
@@ -96,27 +97,41 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    device_lock_t *lock = device_lock_acquire(dev_path,
+            extract_mode ? DEVICE_LOCK_UNMOUNT_ONLY : DEVICE_LOCK_EXCLUSIVE);
+    if (lock == NULL) {
+        fprintf(stderr, "Error: could not unmount/lock device '%s'.\n"
+                        "Close any programs using the drive and retry.\n", dev_path);
+        return 1;
+    }
+
     if (extract_mode) {
         if (write_iso_extracted(iso_path, dev_path, print_progress_cli) != 0) {
             fprintf(stderr, "Error: extraction to '%s' failed\n", dev_path);
+            device_lock_release(lock);
             return 1;
         }
         printf("\n=== Imaging Complete! ===\n");
         printf("Files from '%s' were extracted to '%s'.\n", iso_path, dev_path);
         printf("(File-level copy: bit-for-bit verification is not applicable.)\n\n");
+        device_lock_release(lock);
         return 0;
     }
 
     off_t bytes_written = 0;
     if (write_image_to_device(iso_path, img_info.format, dev_path, print_progress_cli, &bytes_written) != 0) {
         fprintf(stderr, "Error: Failed to write image to device '%s'\n", dev_path);
+        device_lock_release(lock);
         return 1;
     }
 
     if (verify_device_against_image(iso_path, img_info.format, dev_path, bytes_written, print_progress_cli) != 0) {
         fprintf(stderr, "Error: Verification failed for device '%s'\n", dev_path);
+        device_lock_release(lock);
         return 1;
     }
+
+    device_lock_release(lock);
 
     printf("\n=== Imaging Complete! ===\n");
     printf("Image '%s' has been successfully written to device '%s'\n", iso_path, dev_path);

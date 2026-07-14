@@ -8,7 +8,7 @@ CODEC_LIBS=-lz -llzma -lbz2 -lzstd
 
 CFLAGS=-O2 -Wall -I./include $(CODEC_DEFS)
 TARGET=imager
-SRCS=src/main.c src/core/progress.c src/utils/utils.c src/core/iso_operations.c src/core/image_format.c src/core/image_reader.c src/core/image_write.c src/core/windows_iso.c
+SRCS=src/main.c src/core/progress.c src/utils/utils.c src/core/iso_operations.c src/core/image_format.c src/core/image_reader.c src/core/image_write.c src/core/windows_iso.c src/core/device_lock.c
 OBJS=$(SRCS:.c=.o)
 
 all: $(TARGET)
