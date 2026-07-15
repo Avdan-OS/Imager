@@ -73,7 +73,8 @@ endif()
 include(FetchContent)
 FetchContent_Declare(
   wxWidgets
-  URL https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.4/wxWidgets-3.2.4.tar.bz2
+  URL https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8.1/wxWidgets-3.2.8.1.tar.bz2
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 # wxWidgets build can be slow, we only need core and base
 set(wxBUILD_SHARED OFF CACHE BOOL "" FORCE)
