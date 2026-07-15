@@ -1,97 +1,136 @@
-# AvdanOS Imager Usage Guide
+# Usage
 
-## Overview
+## Synopsis
 
-AvdanOS Imager writes ISO images to USB devices. It includes:
-- **CLI version (`imager`)**: For fast, command-line usage.
-- **GUI version (`imager-gui`)**: For a user-friendly drag-and-drop experience.
-
-## Basic Usage (CLI)
-
-### Linux/macOS
-```bash
-sudo ./imager <iso_file> <usb_device>
+```
+imager [--extract] <image> <device>
 ```
 
-### Windows (Administrator)
+Writing to a raw device requires elevated privileges: use `sudo` on Linux
+and macOS, or an Administrator shell on Windows.
+
+## Supported images
+
+| Type | Example | Behavior |
+|------|---------|----------|
+| Hybrid ISO (ISO9660 + MBR/GPT) | most Linux distros | written raw, boots BIOS/UEFI |
+| Raw disk image (MBR or GPT) | `.img` files, Raspberry Pi images | written raw |
+| Compressed image | `foo.iso.gz`, `bar.img.xz`, `.bz2`, `.zst` | decompressed on the fly while writing |
+| Plain ISO9660 (no partition table) | some old or exotic ISOs | written raw with a warning; may not boot everywhere |
+| Windows install ISO (UDF) | `Win11.iso` | use `--extract`; a raw write will not boot |
+
+The imager identifies the file by its contents, not its extension, and
+prints what it found before asking for confirmation:
+
+```
+Image: fedora.iso
+Detected format: Hybrid ISO (ISO9660 + MBR/GPT)
+Volume label:    Fedora-WS-Live
+Bootable:        yes (El Torito)
+```
+
+## What a flash actually does
+
+1. Analyzes the image and warns about anything that won't boot.
+2. Asks you to confirm the target device.
+3. Unmounts every filesystem on the device and takes an exclusive lock,
+   so nothing else can touch it mid-write. If another program is using
+   the drive, the imager aborts here instead of corrupting the write.
+4. Writes the image (decompressing on the fly if needed).
+5. Reads everything back and compares it bit for bit against the source.
+
+There is no way to skip the verification pass, and that is intentional:
+USB sticks lie.
+
+## Windows install ISOs (--extract)
+
+Windows ISOs are not hybrid images, so writing them raw produces a stick
+that won't boot. Extraction mode does what tools like Rufus do instead:
+
+```sh
+sudo ./imager --extract Win11.iso /dev/sdb
+```
+
+This partitions the drive (MBR), formats a FAT32 partition, copies the
+ISO contents file by file, and, when `sources/install.wim` is larger than
+FAT32 allows (4 GiB), splits it into `.swm` parts that Windows Setup
+understands.
+
+Extraction mode relies on standard platform tools being present:
+
+- Linux: `parted`, `mkfs.vfat`, `mount`, `tar`; `wimlib-imagex` (package
+  `wimtools`) if the wim needs splitting
+- macOS: `hdiutil`, `diskutil`, `tar`; `wimlib` from Homebrew for splitting
+- Windows: `diskpart`, PowerShell, `robocopy`, `dism` (all ship with
+  Windows)
+
+Known limitations: the resulting stick boots on UEFI systems only, and on
+Windows the OS cannot format FAT32 partitions larger than 32 GB.
+
+## Finding your device
+
+Linux:
+
+```sh
+lsblk -d -o NAME,SIZE,MODEL,TRAN
+```
+
+macOS:
+
+```sh
+diskutil list external
+```
+
+Windows (Administrator PowerShell):
+
 ```powershell
-.\imager.exe <iso_file> \\.\PhysicalDriveX
+Get-Disk
 ```
 
-## GUI Usage
+| OS | Device path format |
+|----|--------------------|
+| Linux | `/dev/sdb`, `/dev/nvme1n1` (the whole disk, not `/dev/sdb1`) |
+| macOS | `/dev/disk4` |
+| Windows | `\\.\PhysicalDrive2` |
 
-1. Launch `imager-gui`.
-2. Drag and drop your `.iso` file onto the window.
-3. Enter the target device path.
-4. Click **FLASH!**.
+Always pass the whole disk, never a partition.
 
-## Finding Your USB Device
+## GUI
 
-### Windows
-Run `wmic diskdrive list brief` or use **Disk Management** to find the `PhysicalDrive` number.
-
-### Linux
-```bash
-lsblk
-```
-
-### macOS
-```bash
-diskutil list
-```
-
-## Device Paths
-
-| OS | Example Path |
-|----|--------------|
-| Windows | `\\.\PhysicalDrive1` |
-| Linux | `/dev/sdX` |
-| macOS | `/dev/diskN` |
-
-## Safety Warnings
-
-⚠️ **IMPORTANT**: This tool will **completely erase** all data on the target device!
-
-- Always double-check the device path.
-- Ensure you have backups.
-- Run as Administrator/Root.
+Run `imager-gui` as root/Administrator. It lists removable drives by
+name and capacity (internal disks are hidden unless you untick "List USB
+drives only"), shows the detected image format and volume label as soon
+as you pick a file, and offers a "Windows extraction mode" checkbox that
+it pre-selects when it detects Windows install media. Progress and
+verification behave exactly like the CLI.
 
 ## Troubleshooting
 
-### Permission Denied
-Ensure you are running the terminal (or the GUI app) as **Administrator** (Windows) or using **sudo** (Linux/macOS).
-```bash
-sudo ./imager ubuntu.iso /dev/sdX
-```
+**"Permission denied" / "Error opening device"** - you are not root (or
+not an Administrator). Elevate and retry.
 
-### Device Not Found
-- Ensure the USB device is properly connected.
-- Check if the device is mounted; some OSs block raw access to mounted drives.
-- On Windows, ensure you used the `\\.\PhysicalDriveX` format or use the dropdown in the GUI.
+**"Could not unmount/lock device"** - something is using the drive: a
+file manager window, a terminal with its working directory on the stick,
+an indexer, another imaging tool. Close it and retry. On Windows,
+Explorer windows showing the drive are the usual culprit.
 
-### Verification Failed
-- Try writing again.
-- Check if the USB device has sufficient space.
-- Ensure the device is not defective. Both the CLI and GUI always perform a verification pass after writing.
+**"This build has no ... support compiled in"** - the image is compressed
+with a codec that wasn't available when the imager was built. Either
+decompress the file manually (`xz -d`, `gunzip`, ...) or rebuild with the
+codec's development package installed; see
+[BUILD.md](BUILD.md).
 
-## Advanced Usage
+**"Verification failed"** - the data read back from the stick doesn't
+match the image. Retry once; if it fails again the stick is almost
+certainly counterfeit or worn out. Cheap high-capacity sticks that fail
+exactly at the same percentage every time are reporting more capacity
+than they physically have.
 
-### Building from Source
-See [BUILD.md](BUILD.md) for build instructions.
+**Warning about a plain ISO9660 / UDF image** - the image has no
+partition table, so a raw write may not produce a bootable drive. For
+Windows ISOs, use `--extract`. For anything else, check whether the
+vendor provides a `.img` or hybrid ISO variant.
 
-### Installation (Linux/macOS)
-```bash
-sudo cp imager /usr/local/bin/
-```
-
-Then use from anywhere:
-```bash
-sudo imager ubuntu.iso /dev/sdX
-```
-
-## Future GUI Features
-
-While the initial GUI is functional, I plan to add:
-- Automated `.iso` downloading.
-- Advanced partitioning options.
-- User-friendly interface similar to Balena Etcher.
+**The drive "shrank" after flashing** - normal. The OS only sees the
+partitions defined by the image. Repartition and reformat the stick to
+get the full capacity back.
