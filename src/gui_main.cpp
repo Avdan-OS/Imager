@@ -8,22 +8,34 @@ extern "C" {
     #include "imager/iso_operations.h"
     #include "imager/progress.h"
     #include "imager/drive_list.h"
+    #include "imager/image_format.h"
+    #include "imager/image_reader.h"
+    #include "imager/image_write.h"
+    #include "imager/windows_iso.h"
+    #include "imager/device_lock.h"
 }
 
 #include <string>
 #include <vector>
 
-// Custom event for progress updates
 wxDEFINE_EVENT(wxEVT_FLASH_PROGRESS, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_FLASH_COMPLETE, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_FLASH_ERROR, wxThreadEvent);
 
 class FlashingThread : public wxThread {
 public:
-    FlashingThread(const wxString& isoPath, const wxString& devPath, wxEvtHandler* handler)
-        : wxThread(wxTHREAD_DETACHED), m_isoPath(isoPath), m_devPath(devPath), m_handler(handler) {}
+    FlashingThread(const wxString& isoPath, const wxString& devPath,
+                   image_format_t format, bool extractMode, wxEvtHandler* handler)
+        : wxThread(wxTHREAD_DETACHED), m_isoPath(isoPath), m_devPath(devPath),
+          m_format(format), m_extractMode(extractMode), m_handler(handler) {}
 
 protected:
+    void PostError(const wxString& msg) {
+        wxThreadEvent* event = new wxThreadEvent(wxEVT_FLASH_ERROR);
+        event->SetString(msg);
+        wxQueueEvent(m_handler, event);
+    }
+
     virtual ExitCode Entry() {
         g_currentHandler = m_handler;
 
@@ -37,40 +49,44 @@ protected:
             }
         };
 
-        if (write_iso_to_device(m_isoPath.mb_str(), m_devPath.mb_str(), progress_cb) == 0) {
-            off_t isoSize = 0;
-            int iso_fd = open_iso_file(m_isoPath.mb_str(), &isoSize);
-            if (iso_fd >= 0) {
-                #ifdef _WIN32
-                _close(iso_fd);
-                #else
-                close(iso_fd);
-                #endif
-                
-                if (verify_device_against_iso(m_isoPath.mb_str(), m_devPath.mb_str(), isoSize, progress_cb) == 0) {
-                    wxQueueEvent(m_handler, new wxThreadEvent(wxEVT_FLASH_COMPLETE));
-                } else {
-                    wxThreadEvent* event = new wxThreadEvent(wxEVT_FLASH_ERROR);
-                    event->SetString("Verification Failed");
-                    wxQueueEvent(m_handler, event);
-                }
-            } else {
-                wxThreadEvent* event = new wxThreadEvent(wxEVT_FLASH_ERROR);
-                event->SetString("Failed to open ISO for verification");
-                wxQueueEvent(m_handler, event);
-            }
-        } else {
-            wxThreadEvent* event = new wxThreadEvent(wxEVT_FLASH_ERROR);
-            event->SetString("Flash Failed");
-            wxQueueEvent(m_handler, event);
+        device_lock_t* lock = device_lock_acquire(m_devPath.mb_str(),
+                m_extractMode ? DEVICE_LOCK_UNMOUNT_ONLY : DEVICE_LOCK_EXCLUSIVE);
+        if (lock == NULL) {
+            PostError("Device is busy: could not unmount/lock it.\n"
+                      "Close any programs using the drive and retry.");
+            return (ExitCode)0;
         }
 
+        if (m_extractMode) {
+            if (write_iso_extracted(m_isoPath.mb_str(), m_devPath.mb_str(), progress_cb) == 0) {
+                wxQueueEvent(m_handler, new wxThreadEvent(wxEVT_FLASH_COMPLETE));
+            } else {
+                PostError("Extraction Failed");
+            }
+        } else {
+            off_t bytesWritten = 0;
+            if (write_image_to_device(m_isoPath.mb_str(), m_format, m_devPath.mb_str(),
+                                      progress_cb, &bytesWritten) == 0) {
+                if (verify_device_against_image(m_isoPath.mb_str(), m_format, m_devPath.mb_str(),
+                                                bytesWritten, progress_cb) == 0) {
+                    wxQueueEvent(m_handler, new wxThreadEvent(wxEVT_FLASH_COMPLETE));
+                } else {
+                    PostError("Verification Failed");
+                }
+            } else {
+                PostError("Flash Failed");
+            }
+        }
+
+        device_lock_release(lock);
         return (ExitCode)0;
     }
 
 private:
     wxString m_isoPath;
     wxString m_devPath;
+    image_format_t m_format;
+    bool m_extractMode;
     wxEvtHandler* m_handler;
     static wxEvtHandler* g_currentHandler;
 };
@@ -79,7 +95,7 @@ wxEvtHandler* FlashingThread::g_currentHandler = nullptr;
 
 class MainFrame : public wxFrame {
 public:
-    MainFrame() : wxFrame(NULL, wxID_ANY, "AvdanOS Imager", wxDefaultPosition, wxSize(480, 480)) {
+    MainFrame() : wxFrame(NULL, wxID_ANY, "AvdanOS Imager", wxDefaultPosition, wxSize(480, 560)) {
         SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_FRAMEBK));
 
         wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
@@ -108,7 +124,16 @@ public:
         isoSizer->Add(m_isoText, 1, wxEXPAND | wxRIGHT, 5);
         m_selectBtn = new wxButton(this, wxID_ANY, "SELECT");
         isoSizer->Add(m_selectBtn, 0);
-        driveSizer->Add(isoSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+        driveSizer->Add(isoSizer, 0, wxEXPAND | wxLEFT | wxRIGHT, 10);
+
+        m_formatLabel = new wxStaticText(this, wxID_ANY, "Format: (no image selected)");
+        driveSizer->Add(m_formatLabel, 0, wxLEFT | wxRIGHT | wxTOP, 10);
+
+        m_extractCheck = new wxCheckBox(this, wxID_ANY, "Windows extraction mode (FAT32 + file copy)");
+        m_extractCheck->SetToolTip("For Windows-style install ISOs: partitions the drive,\n"
+                                   "formats FAT32, copies files and splits install.wim\n"
+                                   "when it exceeds the FAT32 4 GiB limit.");
+        driveSizer->Add(m_extractCheck, 0, wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 10);
 
         mainSizer->Add(driveSizer, 0, wxEXPAND | wxALL, 15);
 
@@ -164,6 +189,31 @@ private:
         else m_devChoice->Append("No suitable drives found");
     }
 
+    void AnalyzeImage() {
+        m_imgValid = false;
+        m_formatLabel->SetLabel("Format: (no image selected)");
+        if (m_isoText->GetValue().IsEmpty()) return;
+
+        if (detect_image_format(m_isoText->GetValue().mb_str(), &m_imgInfo) != 0) {
+            m_formatLabel->SetLabel("Format: could not analyze file");
+            m_extractCheck->Enable(false);
+            m_extractCheck->SetValue(false);
+            return;
+        }
+        m_imgValid = true;
+
+        wxString info = wxString::Format("Format: %s", image_format_name(m_imgInfo.format));
+        if (m_imgInfo.volume_label[0] != '\0') {
+            info += wxString::Format("  |  Label: %s", wxString::FromUTF8(m_imgInfo.volume_label));
+        }
+        m_formatLabel->SetLabel(info);
+
+        bool compressed = (image_format_is_raw_writable(&m_imgInfo) < 0);
+        m_extractCheck->Enable(!compressed);
+        m_extractCheck->SetValue(!compressed && m_imgInfo.format == IMG_FORMAT_UDF);
+        Layout();
+    }
+
     void OnToggleUsbOnly(wxCommandEvent& event) {
         RefreshDrives();
     }
@@ -173,32 +223,62 @@ private:
     }
 
     void OnSelectISO(wxCommandEvent& event) {
-        wxFileDialog openFileDialog(this, _("Open ISO file"), "", "",
-                                   "ISO files (*.iso)|*.iso|All files (*.*)|*.*", wxFD_OPEN|wxFD_FILE_MUST_EXIST);
+        wxFileDialog openFileDialog(this, _("Open disk image"), "", "",
+                                   "Disk images (*.iso;*.img;*.gz;*.xz;*.bz2;*.zst)|*.iso;*.img;*.gz;*.xz;*.bz2;*.zst|All files (*.*)|*.*",
+                                   wxFD_OPEN|wxFD_FILE_MUST_EXIST);
         if (openFileDialog.ShowModal() == wxID_CANCEL) return;
         m_isoText->SetValue(openFileDialog.GetPath());
+        AnalyzeImage();
     }
 
     void OnStartFlash(wxCommandEvent& event) {
         if (m_isoText->GetValue().IsEmpty() || m_devChoice->GetSelection() == wxNOT_FOUND || m_drivePaths.empty()) {
-            wxMessageBox("Please select both an ISO file and a target device.", "Error", wxOK | wxICON_ERROR);
+            wxMessageBox("Please select both an image file and a target device.", "Error", wxOK | wxICON_ERROR);
             return;
+        }
+        if (!m_imgValid) {
+            wxMessageBox("The selected image could not be analyzed.", "Error", wxOK | wxICON_ERROR);
+            return;
+        }
+
+        bool extractMode = m_extractCheck->GetValue();
+        int writable = image_format_is_raw_writable(&m_imgInfo);
+
+        if (writable < 0) {
+            if (!image_reader_format_supported(m_imgInfo.format)) {
+                wxMessageBox(wxString::Format(
+                        "This build has no %s support compiled in.\n"
+                        "Decompress the file manually or rebuild with the codec library.",
+                        image_format_name(m_imgInfo.format)),
+                    "Error", wxOK | wxICON_ERROR);
+                return;
+            }
         }
 
         wxString devPath = m_drivePaths[m_devChoice->GetSelection()];
 
-        int answer = wxMessageBox("This will ERASE ALL DATA on " + devPath + ". Continue?", 
-                                 "WARNING", wxYES_NO | wxICON_WARNING | wxNO_DEFAULT);
+        wxString warning = "This will ERASE ALL DATA on " + devPath + ".";
+        if (!extractMode && writable == 0) {
+            warning += "\n\nWarning: " + wxString::FromUTF8(m_imgInfo.description);
+            if (m_imgInfo.format == IMG_FORMAT_UDF || m_imgInfo.format == IMG_FORMAT_ISO9660) {
+                warning += "\nTip: enable 'Windows extraction mode' for Windows install ISOs.";
+            }
+        }
+        warning += "\n\nContinue?";
+
+        int answer = wxMessageBox(warning, "WARNING", wxYES_NO | wxICON_WARNING | wxNO_DEFAULT);
         if (answer != wxYES) return;
 
         m_startBtn->Disable();
         m_selectBtn->Disable();
         m_refreshBtn->Disable();
         m_devChoice->Disable();
+        m_extractCheck->Disable();
         m_gauge->SetValue(0);
         m_statusLabel->SetLabel("Initializing...");
 
-        FlashingThread* thread = new FlashingThread(m_isoText->GetValue(), devPath, this);
+        FlashingThread* thread = new FlashingThread(m_isoText->GetValue(), devPath,
+                                                    m_imgInfo.format, extractMode, this);
         if (thread->Run() != wxTHREAD_NO_ERROR) {
             wxMessageBox("Could not create the flashing thread!", "Error", wxOK | wxICON_ERROR);
             ResetUI();
@@ -214,7 +294,7 @@ private:
     void OnComplete(wxThreadEvent& event) {
         m_gauge->SetValue(100);
         m_statusLabel->SetLabel("Flash Successful!");
-        wxMessageBox("The ISO has been successfully written and verified.", "Success", wxOK | wxICON_INFORMATION);
+        wxMessageBox("The image has been successfully written to the device.", "Success", wxOK | wxICON_INFORMATION);
         ResetUI();
     }
 
@@ -229,17 +309,23 @@ private:
         m_selectBtn->Enable();
         m_refreshBtn->Enable();
         m_devChoice->Enable();
+        bool compressed = m_imgValid && (image_format_is_raw_writable(&m_imgInfo) < 0);
+        m_extractCheck->Enable(m_imgValid && !compressed);
     }
 
     wxTextCtrl* m_isoText;
     wxChoice* m_devChoice;
     wxCheckBox* m_listUsbOnly;
+    wxCheckBox* m_extractCheck;
     wxButton* m_selectBtn;
     wxButton* m_refreshBtn;
     wxButton* m_startBtn;
     wxGauge* m_gauge;
     wxStaticText* m_statusLabel;
+    wxStaticText* m_formatLabel;
     std::vector<wxString> m_drivePaths;
+    image_info_t m_imgInfo;
+    bool m_imgValid = false;
 };
 
 class ImagerApp : public wxApp {
